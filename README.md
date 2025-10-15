@@ -1,12 +1,18 @@
 # 🔐 SecureShell Pro - Chrome Extension
 
-> **Professional Remote Terminal with Advanced Search, Authentication & Encryption**
+> **Professional Remote Terminal with Advanced Search, Authentication & Encryption** 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/yourusername/secureshell-pro)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-green.svg)](https://chrome.google.com/webstore)
+[![Node.js](https://img.shields.io/badge/Node.js-16%2B-brightgreen?logo=node.js)](https://nodejs.org/)
+[![WSS](https://img.shields.io/badge/WSS-Enabled-blue.svg)](#)
+[![Terminal](https://img.shields.io/badge/Terminal-xterm-black.svg)](#)
 
+Secure browser remote shell (WSS) to your VPS — no SSH client required
 A powerful, feature-rich Chrome extension that provides secure remote terminal access with professional-grade features tailored for penetration testers, system administrators, and security professionals.
+
+<meta name="description" content="SecureShell-Pro — Secure Node.js WSS browser terminal to your VPS. Fast, lightweight, no SSH client needed — multi-tab shells, saved commands & audit logging.">
 
 <p align="center">
   <img src="./extension/icons/icon.svg" alt="logo" width="128">
