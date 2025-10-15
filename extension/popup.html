@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 400px;
+            min-height: 400px;
+            max-height: 600px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            overflow: auto;
+        }
+
+        body.terminal-active {
+            width: 680px;
+            min-height: 550px;
+            max-height: 600px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: visible;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .terminal-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .connection-section {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .commands-section {
+            margin-top: 20px;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .add-btn {
+            padding: 6px 12px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .commands-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .command-item {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .command-item:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
+        }
+
+        .command-info {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .command-alias {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .command-text {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #666;
+            word-break: break-all;
+        }
+
+        .command-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background: #2196f3;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 13px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .status {
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+#terminalContainer {
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+            max-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #terminal {
+            width: 100%;
+            height: 400px;
+            overflow-y: auto !important;
+        }
+
+        /* Fix xterm scrolling in popup */
+        .xterm {
+            height: 100% !important;
+        }
+
+        .xterm-viewport {
+            overflow-y: scroll !important;
+            background-color: #000;
+            height: 100% !important;
+        }
+
+        .xterm-screen {
+            padding: 5px;
+        }
+
+        .xterm .xterm-helper-textarea {
+            position: absolute;
+            opacity: 0;
+            left: -9999em;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <div class="terminal-icon">$</div>
+            Remote Terminal
+        </h1>
+
+        <div class="connection-section">
+            <label>WebSocket Server</label>
+            <input type="text" id="serverUrl" placeholder="ws://192.168.1.7:6060 or wss://example.com:6060" value="ws://192.168.1.7:6060">
+            <div style="font-size: 11px; color: #666; margin-top: 4px;">
+                💡 Use <strong>wss://</strong> for secure TLS connections
+            </div>
+        </div>
+
+        <div class="connection-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="margin: 0;">Password (Optional)</label>
+                <button id="togglePassword" style="padding: 4px 8px; background: transparent; border: none; cursor: pointer; font-size: 12px; color: #667eea;" title="Show/Hide password">👁️</button>
+            </div>
+            <div style="position: relative;">
+                <input type="password" id="serverPassword" placeholder="Leave empty if no auth" style="padding-right: 40px;">
+                <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 18px;">🔐</span>
+            </div>
+            <div style="font-size: 11px; color: #666; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                <span>💡</span>
+                <span>Tip: You can also authenticate directly in the terminal</span>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-primary" id="connectPopup">
+                <span>⚡</span> Connect Here
+            </button>
+            <button class="btn-primary" id="openNewTab">
+                <span>🗗</span> Open in Tab
+            </button>
+        </div>
+
+        <button class="btn-secondary" id="disconnectBtn" style="width: 100%; display: none;">
+            <span>⏹</span> Disconnect
+        </button>
+
+        <div id="status" class="status"></div>
+
+        <!-- Terminal Container (hidden by default) -->
+        <div id="terminalContainer" style="display: none;">
+            <div id="terminal"></div>
+        </div>
+
+        <div class="commands-section" id="commandsSection">
+            <div class="section-header">
+                <div class="section-title">📋 Quick Commands</div>
+                <button class="add-btn" id="addCommandBtn">+ Add</button>
+            </div>
+            <div class="commands-list" id="commandsList">
+                <div class="empty-state">
+                    No commands saved yet.<br>Click "+ Add" to create one.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Command Modal -->
+    <div class="modal" id="commandModal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">Add Command</div>
+            <div class="form-group">
+                <label>Alias/Name</label>
+                <input type="text" id="commandAlias" placeholder="e.g., List Files">
+            </div>
+            <div class="form-group">
+                <label>Command</label>
+                <input type="text" id="commandText" placeholder="e.g., ls -la">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancelModal">Cancel</button>
+                <button class="btn-primary" id="saveCommand">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./lib/xterm.js"></script>
+    <script src="./popup.js"></script>
+</body>
+</html>

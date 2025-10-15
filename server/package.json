@@ -1,0 +1,29 @@
+{
+  "name": "secureshell-pro-server",
+  "version": "3.0.0",
+  "description": "Secure WebSocket terminal server for SecureShell Pro extension",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "terminal",
+    "websocket",
+    "security",
+    "pentesting",
+    "remote-shell"
+  ],
+  "author": "B4l3rI0n",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.14.2",
+    "node-pty": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

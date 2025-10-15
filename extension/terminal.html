@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Remote Terminal</title>
+    <link rel="stylesheet" href="./lib/xterm.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .status-indicator {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-indicator.disconnected {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .status-indicator.connecting {
+            background: rgba(255, 193, 7, 0.9);
+            color: #000;
+        }
+
+        .status-indicator.connected {
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .header-btn.danger {
+            border-color: rgba(244, 67, 54, 0.5);
+            background: rgba(244, 67, 54, 0.2);
+        }
+
+        .header-btn.danger:hover {
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        .terminal-container {
+            flex: 1;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #terminal {
+            flex: 1;
+            background: #000;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .commands-sidebar {
+            position: fixed;
+            right: -320px;
+            top: 0;
+            width: 320px;
+            height: 100vh;
+            background: #2d2d2d;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .commands-sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-header {
+            background: #1e1e1e;
+            padding: 20px;
+            border-bottom: 1px solid #444;
+        }
+
+        .sidebar-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-search {
+            width: 100%;
+            padding: 10px;
+            background: #3d3d3d;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .sidebar-search:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .sidebar-commands {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .sidebar-command-item {
+            background: #3d3d3d;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-command-item:hover {
+            background: #4d4d4d;
+            border-left-color: #667eea;
+            transform: translateX(4px);
+        }
+
+        .sidebar-command-alias {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-command-text {
+            color: #aaa;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .toggle-sidebar-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            z-index: 150;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-sidebar-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2d2d2d;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            background: #3d3d3d;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn.cancel {
+            background: #3d3d3d;
+            color: white;
+        }
+
+        .modal-btn.save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .search-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .search-tab:hover {
+            color: #fff;
+        }
+
+        .search-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .search-panel {
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .search-highlight {
+            background-color: #ffeb3b;
+            color: #000;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">$</div>
+                <span>Remote Terminal</span>
+            </div>
+            <div class="status-indicator disconnected" id="statusIndicator">
+                <div class="status-dot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" id="searchBtn">
+                🔍 Search
+            </button>
+            <button class="header-btn" id="reconnectBtn" style="display: none;">
+                🔄 Reconnect
+            </button>
+            <button class="header-btn danger" id="disconnectBtn" style="display: none;">
+                ⏹ Disconnect
+            </button>
+            <button class="header-btn" id="settingsBtn">
+                ⚙️ Settings
+            </button>
+        </div>
+    </div>
+
+    <div class="terminal-container">
+        <div id="terminal"></div>
+    </div>
+
+    <div class="commands-sidebar" id="commandsSidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Quick Commands</div>
+            <input type="text" class="sidebar-search" id="commandSearch" placeholder="Search commands...">
+        </div>
+        <div class="sidebar-commands" id="sidebarCommands">
+            <div style="color: #aaa; text-align: center; padding: 40px 20px;">
+                No commands available.<br>Add some from the extension popup!
+            </div>
+        </div>
+    </div>
+
+    <button class="toggle-sidebar-btn" id="toggleSidebarBtn">
+        📋
+    </button>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">Connection Settings</div>
+            <div class="form-group">
+                <label class="form-label">WebSocket Server URL</label>
+                <input type="text" class="form-input" id="settingsServerUrl" placeholder="ws://192.168.1.7:6060 or wss://example.com:6060">
+                <div style="font-size: 11px; color: #aaa; margin-top: 4px;">
+                    💡 Use wss:// for secure connections (TLS/SSL)
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password (Optional)</label>
+                <input type="password" class="form-input" id="settingsServerPassword" placeholder="Leave empty if no auth">
+                <div style="font-size: 11px; color: #aaa; margin-top: 4px;">
+                    💡 Or use /auth command in terminal
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancelSettings">Cancel</button>
+                <button class="modal-btn save" id="saveSettings">Save & Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="modal" id="searchModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">🔍 Search</div>
+            
+            <!-- Search Mode Tabs -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #444;">
+                <button class="search-tab active" id="terminalSearchTab" data-mode="terminal">
+                    Terminal Output
+                </button>
+                <button class="search-tab" id="fileSearchTab" data-mode="file">
+                    Files & Folders
+                </button>
+            </div>
+
+            <!-- Terminal Search -->
+            <div id="terminalSearchPanel" class="search-panel">
+                <div class="form-group">
+                    <label class="form-label">Search in Terminal Output</label>
+                    <input type="text" class="form-input" id="terminalSearchInput" placeholder="Enter text to search...">
+                </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 6px; color: #aaa; font-size: 13px;">
+                        <input type="checkbox" id="terminalCaseSensitive">
+                        Case Sensitive
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; color: #aaa; font-size: 13px;">
+                        <input type="checkbox" id="terminalRegex">
+                        Regular Expression
+                    </label>
+                </div>
+                <div id="terminalSearchResults" style="max-height: 200px; overflow-y: auto; background: #1e1e1e; border-radius: 8px; padding: 10px; margin-bottom: 16px; display: none;">
+                    <div style="color: #aaa; font-size: 12px; font-family: 'Courier New', monospace;"></div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="modal-btn save" id="searchTerminalBtn" style="flex: 1;">Search</button>
+                    <button class="modal-btn cancel" id="clearTerminalSearchBtn">Clear</button>
+                </div>
+            </div>
+
+            <!-- File Search -->
+            <div id="fileSearchPanel" class="search-panel" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Search Text</label>
+                    <input type="text" class="form-input" id="fileSearchText" placeholder="Text to find in files...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Search Path (Optional)</label>
+                    <input type="text" class="form-input" id="fileSearchPath" placeholder="/path/to/search or leave empty for current directory">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">File Pattern (Optional)</label>
+                    <input type="text" class="form-input" id="fileSearchPattern" placeholder="*.txt or *.js or leave empty for all files">
+                </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 6px; color: #aaa; font-size: 13px;">
+                        <input type="checkbox" id="fileSearchRecursive" checked>
+                        Recursive
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; color: #aaa; font-size: 13px;">
+                        <input type="checkbox" id="fileSearchCaseSensitive">
+                        Case Sensitive
+                    </label>
+                </div>
+                <div id="fileSearchResults" style="max-height: 200px; overflow-y: auto; background: #1e1e1e; border-radius: 8px; padding: 10px; margin-bottom: 16px; display: none;">
+                    <div style="color: #aaa; font-size: 12px; font-family: 'Courier New', monospace;"></div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="modal-btn save" id="executeFileSearchBtn" style="flex: 1;">Search Files</button>
+                    <button class="modal-btn cancel" id="cancelSearchBtn">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./lib/xterm.js"></script>
+    <script src="./terminal.js"></script>
+</body>
+</html>

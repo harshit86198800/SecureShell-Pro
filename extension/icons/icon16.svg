@@ -1,0 +1,13 @@
+<!-- logo-badge-16.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
+<defs>
+<linearGradient id="g" x1="0" x2="1">
+<stop offset="0" stop-color="#7C3AED" />
+<stop offset="1" stop-color="#60A5FA" />
+</linearGradient>
+</defs>
+<circle cx="256" cy="256" r="248" fill="#071033"/>
+<circle cx="256" cy="256" r="196" fill="url(#g)" opacity="0.12"/>
+<rect x="128" y="176" width="256" height="160" rx="20" fill="#0B1220"/>
+<path d="M176 232 L228 274 L176 316" fill="none" stroke="#7C3AED" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
