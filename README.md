@@ -141,13 +141,11 @@ SecureShell-Pro/
 │       ├── xterm.js        # Terminal emulator
 │       └── xterm.css       # Terminal styles
 │
-├── server/                 # WebSocket Server
-│   ├── server.js           # Main server file
-│   ├── package.json        # Node.js dependencies
-│   └── logs/               # Auto-generated logs
-│
-├── LICENSE                 # MIT License
-└── README.md              # This file
+└── server/                 # WebSocket Server
+    ├── server.js           # Main server file
+    ├── package.json        # Node.js dependencies
+    └── logs/               # Auto-generated logs
+
 ```
 
 ---
