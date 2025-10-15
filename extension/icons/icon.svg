@@ -10,5 +10,5 @@
 <circle cx="256" cy="256" r="196" fill="url(#g)" opacity="0.12"/>
 <rect x="128" y="176" width="256" height="160" rx="20" fill="#0B1220"/>
 <path d="M176 232 L228 274 L176 316" fill="none" stroke="#7C3AED" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="256" y="380" font-family="Inter, Helvetica, Arial, sans-serif" font-size="36" fill="#E6EEF8" text-anchor="middle">RemoteTerm</text>
+<text x="256" y="380" font-family="Inter, Helvetica, Arial, sans-serif" font-size="36" fill="#E6EEF8" text-anchor="middle">RemoteTerminal</text>
 </svg>
